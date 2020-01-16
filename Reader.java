@@ -4,6 +4,7 @@ import java.io.FileReader;
 import java.io.PrintWriter;
 import java.io.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 class Hand {
     
@@ -57,6 +58,16 @@ class Hand {
     /**
     [bitHandRep s] is the integer bit representation of the string representation
     [s] of the current hand. Reference Cactus Kev's hand evaluator algorithm
+
+    +--------+--------+--------+--------+
+    |xxxbbbbb|bbbbbbbb|cdhsrrrr|xxpppppp|
+    +--------+--------+--------+--------+
+    
+    p = prime number of rank (deuce=2,trey=3,four=5,five=7,...,ace=41) 
+    r = rank of card (deuce=0,trey=1,four=2,five=3,...,ace=12)
+    cdhs = suit of card
+    b = bit turned on depending on rank of card
+
     */
     public Hand bitHandRep(String s) {
                 
@@ -97,14 +108,43 @@ class Hand {
             suitrank2 = 4;
         }
         
+        System.out.println("rank1: " + rank1);
+        System.out.println("rank2: " + rank2);
         first = primeRank1 + (rank1 << 8) + (1 << (11 + suitrank1)) 
-                    + (1 << (12 + suitrank1 + rank1));
+                    + (1 << (16 + rank1));
         second = primeRank2 + (rank2 << 8) + (1 << (11 + suitrank2)) 
-                    + (1 << (12 + suitrank2 + rank2));
+                    + (1 << (16 + rank2));
         
         return new Hand(first, second);
     } 
+
 }
+
+class Tables {
+
+    HashMap<Integer, Integer> flushes;
+
+    public Tables() {
+        flushes = new HashMap<Integer, Integer>();
+    }
+
+    public void flushMap(String str) {
+    
+        List<String> temp = Arrays.asList(str.split("\\s*,\\s*"));
+        List<Integer> newTemp = temp.stream().map(s -> Integer.parseInt(s)).collect(Collectors.toList());
+        
+        for (int i = 0; i < newTemp.size(); i++) {
+            int curr = newTemp.get(i);
+            if (curr != 0) {
+                System.out.println(i);     
+            }       
+        }
+    }
+}
+
+/** 
+Hand Evaluator
+*/
 
 class Reader {
     Hand hand;                  // 32 bit representation of hand
@@ -119,9 +159,13 @@ class Reader {
         try {
 
             reader = new BufferedReader(new InputStreamReader(System.in));
+
+            Hand start = new Hand();
+            Tables t = new Tables();
+
             // Redo later for graphics where you can highlight the hand on a GTO table and specify suit
             System.out.println("What is your hand? Denote hearts as h, spades as s, clubs as c, diamonds as d. Ex: Ah6c");
-            Hand start = new Hand();
+
             hand = start.bitHandRep(reader.readLine());
 
             System.out.println("int first: " + hand.first_card);
@@ -129,6 +173,14 @@ class Reader {
             System.out.println("int second: " + hand.second_card);
             System.out.println("binary second: " + Integer.toBinaryString(hand.second_card));
             
+            int x = 0;
+            while (x < 1000) {
+                System.out.println("flushes array?");
+                t.flushMap(reader.readLine());
+                // System.out.println(t.flushes);
+                x++;
+            }
+
             // Click a button or something
             System.out.println("What is your position in the hand? Denote 1 as SB up to 6 as BTN");
             pos = Integer.parseInt(reader.readLine());
